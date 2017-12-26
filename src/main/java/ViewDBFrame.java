@@ -1,5 +1,3 @@
-import jdk.nashorn.internal.scripts.JO;
-
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
@@ -19,6 +17,7 @@ public class ViewDBFrame extends JFrame {
     private JButton nextButton;
     private JButton deleteButton;
     private JButton saveButton;
+    private JButton newRowsButton;
     private DataPanel dataPanel;
     private Component scrollPane;
     private JComboBox<String> tableNames;
@@ -60,6 +59,7 @@ public class ViewDBFrame extends JFrame {
             }
         });
         buttonPanel.add(previousButton);
+
         nextButton = new JButton("Next");
         nextButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -80,9 +80,16 @@ public class ViewDBFrame extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveChanges();
+//                saveNewRow();
             }
         });
         buttonPanel.add(saveButton);
+
+        newRowsButton = new JButton("Save new row");
+        newRowsButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { saveNewRow();}
+        });
+        buttonPanel.add(newRowsButton);
         pack();
     }
 
@@ -148,6 +155,20 @@ public class ViewDBFrame extends JFrame {
             try (Connection conn = getConnection()){
                 conn.setAutoCommit(false);
                 dataPanel.setRow(crs);
+                crs.acceptChanges(conn);
+            }
+        } catch (SQLException e){
+            JOptionPane.showMessageDialog(this, e);
+        }
+    }
+
+    public void saveNewRow(){
+        try{
+            try(Connection conn = getConnection()){
+                conn.setAutoCommit(false);
+                String newRow = dataPanel.addRow();
+                Statement statement = conn.createStatement();
+                statement.executeUpdate(newRow);
                 crs.acceptChanges(conn);
             }
         } catch (SQLException e){

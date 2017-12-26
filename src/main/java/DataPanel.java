@@ -4,10 +4,13 @@ import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class DataPanel extends JPanel {
     private java.util.List<JTextField> fields;
+    JTextField entry_text = new JTextField(30);
 
     public DataPanel(RowSet rs) throws SQLException{
         fields = new ArrayList<>();
@@ -18,7 +21,7 @@ public class DataPanel extends JPanel {
 
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); ++i){
-            gbc.gridy = i - 1;
+            gbc.gridy = i-1;
             String columnName = rsmd.getColumnLabel(i);
             gbc.gridx = 0;
             gbc.anchor = GridBagConstraints.EAST;
@@ -28,13 +31,20 @@ public class DataPanel extends JPanel {
             JTextField tb = new JTextField(columnWidth);
             if (!rsmd.getColumnClassName(i).equals("java.lang.String"))
                 tb.setEditable(false);
-
             fields.add(tb);
-
             gbc.gridx = 1;
             gbc.anchor = GridBagConstraints.WEST;
             add(tb, gbc);
         }
+        int clmCount = rsmd.getColumnCount();
+        gbc.gridx = 0;
+        gbc.gridy = clmCount;
+        gbc.anchor = GridBagConstraints.WEST;
+        add(new JLabel("new entry"), gbc);
+
+
+        gbc.gridx = 1;
+        add(entry_text, gbc);
     }
 
     public void showRow(ResultSet rs) throws SQLException{
@@ -53,5 +63,10 @@ public class DataPanel extends JPanel {
                 rs.updateString(i, tb.getText());
         }
         rs.updateRow();
+    }
+
+    public String addRow() throws SQLException{
+        String newRow = entry_text.getText();
+        return newRow;
     }
 }

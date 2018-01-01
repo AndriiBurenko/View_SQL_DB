@@ -14,5 +14,3 @@ public class ViewDB {
         });
     }
 }
-
-//    INSERT INTO Authors VALUES ('BREE', 'Brook', 'Fred P.');

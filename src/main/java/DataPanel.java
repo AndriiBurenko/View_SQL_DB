@@ -1,23 +1,23 @@
 import javax.sql.RowSet;
 import javax.swing.*;
 import java.awt.*;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class DataPanel extends JPanel {
     private java.util.List<JTextField> fields;
-    JTextField entry_text = new JTextField(30);
+    private java.util.List<JTextField> fieldsNR;
 
     public DataPanel(RowSet rs) throws SQLException{
         fields = new ArrayList<>();
+        fieldsNR = new ArrayList<>();
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = 1;
         gbc.gridheight = 1;
+        gbc.insets.top = 5;
+        gbc.insets.left = 5;
+        gbc.insets.bottom = 5;
 
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 1; i <= rsmd.getColumnCount(); ++i){
@@ -36,15 +36,28 @@ public class DataPanel extends JPanel {
             gbc.anchor = GridBagConstraints.WEST;
             add(tb, gbc);
         }
-        int clmCount = rsmd.getColumnCount();
-        gbc.gridx = 0;
-        gbc.gridy = clmCount;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(new JLabel("new entry"), gbc);
 
+        for (int i = 1; i <= rsmd.getColumnCount(); ++i){
+            gbc.gridy = rsmd.getColumnCount() + i;
+            String columnName = rsmd.getColumnLabel(i);
+            gbc.gridx = 0;
+            gbc.anchor = GridBagConstraints.EAST;
+            add(new JLabel("new " + columnName), gbc);
 
-        gbc.gridx = 1;
-        add(entry_text, gbc);
+            int columnWidth = rsmd.getColumnDisplaySize(i);
+            JTextField tb = new JTextField(columnWidth);
+            if (!rsmd.getColumnClassName(i).equals("java.lang.String"))
+                tb.setEditable(false);
+            fieldsNR.add(tb);
+            gbc.gridx = 1;
+            gbc.anchor = GridBagConstraints.WEST;
+            if (i == 1) {
+                gbc.insets.top = 15;
+                add(tb, gbc);
+                gbc.insets.top = 5;
+            } else
+                add(tb, gbc);
+        }
     }
 
     public void showRow(ResultSet rs) throws SQLException{
@@ -65,8 +78,25 @@ public class DataPanel extends JPanel {
         rs.updateRow();
     }
 
-    public String addRow() throws SQLException{
-        String newRow = entry_text.getText();
-        return newRow;
+    public void addRow(ResultSet rs, Connection connection) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        String tableName = rsmd.getTableName(1);
+        String exprCount = "? ";
+        for (int i = 1; i <= rsmd.getColumnCount() - 1; ++i) {
+            exprCount += ",? ";
+        }
+
+        PreparedStatement prepStat = connection
+                .prepareStatement("INSERT INTO " + tableName + " VALUES (" + exprCount + ");");
+
+        for (int i = 1; i <= rsmd.getColumnCount(); ++i) {
+            JTextField tb = fieldsNR.get(i - 1);
+            String prepExpr = tb.getText();
+            if (tb.getText().equals(""))
+                JOptionPane.showMessageDialog(this, "The field " + i + " is empty!");
+            else
+                prepStat.setString(i, prepExpr);
+        }
+        prepStat.executeUpdate();
     }
 }

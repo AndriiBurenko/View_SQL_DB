@@ -80,7 +80,6 @@ public class ViewDBFrame extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveChanges();
-//                saveNewRow();
             }
         });
         buttonPanel.add(saveButton);
@@ -111,6 +110,7 @@ public class ViewDBFrame extends JFrame {
             showNextRow();
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, e);
+//            e.printStackTrace();
         }
     }
 
@@ -133,12 +133,14 @@ public class ViewDBFrame extends JFrame {
             dataPanel.showRow(crs);
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, e);
+//            e.printStackTrace();
         }
     }
 
     public void deleteRow(){
         try {
             try (Connection conn = getConnection()){
+                conn.setAutoCommit(false);
                 crs.deleteRow();
                 crs.acceptChanges(conn);
                 if (crs.isAfterLast())
@@ -147,6 +149,7 @@ public class ViewDBFrame extends JFrame {
             }
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, e);
+//            e.printStackTrace();
         }
     }
 
@@ -159,6 +162,7 @@ public class ViewDBFrame extends JFrame {
             }
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, e);
+//            e.printStackTrace();
         }
     }
 
@@ -166,13 +170,15 @@ public class ViewDBFrame extends JFrame {
         try{
             try(Connection conn = getConnection()){
                 conn.setAutoCommit(false);
-                String newRow = dataPanel.addRow();
-                Statement statement = conn.createStatement();
-                statement.executeUpdate(newRow);
+                dataPanel.addRow(crs, conn);
                 crs.acceptChanges(conn);
+                if (crs.isAfterLast())
+                    if (!crs.last()) crs = null;
+                dataPanel.showRow(crs);
             }
         } catch (SQLException e){
             JOptionPane.showMessageDialog(this, e);
+//            e.printStackTrace();
         }
     }
 

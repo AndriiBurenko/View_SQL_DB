@@ -3,8 +3,6 @@ import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -28,11 +26,7 @@ public class ViewDBFrame extends JFrame {
     public ViewDBFrame() {
 
         tableNames = new JComboBox<String>();
-        tableNames.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showTable((String) tableNames.getSelectedItem());
-            }
-        });
+        tableNames.addActionListener(e -> showTable((String) tableNames.getSelectedItem()));
         add(tableNames, BorderLayout.NORTH);
 
         try {
@@ -53,41 +47,23 @@ public class ViewDBFrame extends JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
 
         previousButton = new JButton("Previous");
-        previousButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showPreviousRow();
-            }
-        });
+        previousButton.addActionListener(e -> showPreviousRow());
         buttonPanel.add(previousButton);
 
         nextButton = new JButton("Next");
-        nextButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showNextRow();
-            }
-        });
+        nextButton.addActionListener(e -> showNextRow());
         buttonPanel.add(nextButton);
 
         deleteButton = new JButton("Delete");
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                deleteRow();
-            }
-        });
+        deleteButton.addActionListener(e -> deleteRow());
         buttonPanel.add(deleteButton);
 
         saveButton = new JButton("Save");
-        saveButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                saveChanges();
-            }
-        });
+        saveButton.addActionListener(e -> saveChanges());
         buttonPanel.add(saveButton);
 
         newRowsButton = new JButton("Save new row");
-        newRowsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { saveNewRow();}
-        });
+        newRowsButton.addActionListener(e -> saveNewRow());
         buttonPanel.add(newRowsButton);
         pack();
     }
